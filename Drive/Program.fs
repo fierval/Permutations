@@ -5,7 +5,7 @@ open PermuteSimple
 
 [<EntryPoint>]
 let main argv = 
-    let seqs = generateFactoradic 10
+    let seqs = permute 3
 
     for s in seqs do
         printfn "%A" s

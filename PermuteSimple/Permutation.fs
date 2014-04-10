@@ -15,7 +15,7 @@ module PermutationsModule =
 
         factRec n 1L
 
-    let addOne (num : List<int>) =
+    let nextNum (num : List<int>) =
         // find the "unsaturated" postion
         let zeroOut (num : List<int>) curPos = [0..curPos] |> List.map(fun i -> num.[i] <- 0)
         let rec addOneRec (num : List<int>) curPos =
@@ -23,10 +23,6 @@ module PermutationsModule =
             then 
                 num.[curPos] <- num.[curPos] + 1
                 zeroOut num (curPos - 1) |> ignore
-            elif curPos = num.Count - 1
-            then
-                zeroOut num curPos |> ignore
-                num.Add(1) |> ignore
             else
                 addOneRec num (curPos + 1)
 
@@ -38,23 +34,38 @@ module PermutationsModule =
     let generateFactoradic len =
         
         let maxReached (num : List<int>) len =
-            if num.Count < len then false
+            if num.[len - 1] < len - 1 then false
             else
                 num |> Seq.mapi (fun i n -> i = n) |> Seq.fold (fun st b -> st && b ) true
 
         // stores the current number
         let cur = List<int>()
-        cur.Add(0)
+        cur.AddRange(Array.zeroCreate len)
 
         // first two numbers: 0 and 1!
 
         [|
             let yld = cur.ToArray()
-            yield yld.AsEnumerable()
+            yield yld
 
             while not (maxReached cur len) do
-                addOne cur
+                nextNum cur
                 let yld = cur.ToArray()
-                yield yld.Reverse()               
+                yield yld.Reverse().ToArray()               
         |]
     
+    /// all permutations [0..n-1]
+    let permute n =
+        let factors = generateFactoradic n
+
+        [|
+            for factor in factors do
+                let ordered = Enumerable.Range(0, n).ToList()
+                yield
+                    [| 
+                        for f in factor do
+                            yield ordered.[f]
+                            ordered.RemoveAt(f)
+                    |]
+        |]
+                  
